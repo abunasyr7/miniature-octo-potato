@@ -47,8 +47,62 @@ function formatAlmaty(isoDate) {
   }).format(new Date(isoDate));
 }
 
+// Названия сборных на русском (ключи — как их отдаёт football-data)
+const TEAMS_RU = {
+  Algeria: "Алжир",
+  Argentina: "Аргентина",
+  Australia: "Австралия",
+  Austria: "Австрия",
+  Belgium: "Бельгия",
+  "Bosnia-Herzegovina": "Босния и Герцеговина",
+  Brazil: "Бразилия",
+  Canada: "Канада",
+  "Cape Verde Islands": "Кабо-Верде",
+  Colombia: "Колумбия",
+  "Congo DR": "ДР Конго",
+  Croatia: "Хорватия",
+  "Curaçao": "Кюрасао",
+  Czechia: "Чехия",
+  Ecuador: "Эквадор",
+  Egypt: "Египет",
+  England: "Англия",
+  France: "Франция",
+  Germany: "Германия",
+  Ghana: "Гана",
+  Haiti: "Гаити",
+  Iran: "Иран",
+  Iraq: "Ирак",
+  "Ivory Coast": "Кот-д’Ивуар",
+  Japan: "Япония",
+  Jordan: "Иордания",
+  Mexico: "Мексика",
+  Morocco: "Марокко",
+  Netherlands: "Нидерланды",
+  "New Zealand": "Новая Зеландия",
+  Norway: "Норвегия",
+  Panama: "Панама",
+  Paraguay: "Парагвай",
+  Portugal: "Португалия",
+  Qatar: "Катар",
+  "Saudi Arabia": "Саудовская Аравия",
+  Scotland: "Шотландия",
+  Senegal: "Сенегал",
+  "South Africa": "ЮАР",
+  "South Korea": "Южная Корея",
+  Spain: "Испания",
+  Sweden: "Швеция",
+  Switzerland: "Швейцария",
+  Tunisia: "Тунис",
+  Turkey: "Турция",
+  "United States": "США",
+  Uruguay: "Уругвай",
+  Uzbekistan: "Узбекистан",
+};
+
 function teamName(team) {
-  return team?.name || team?.shortName || team?.tla || "TBD";
+  const en = team?.name || team?.shortName || team?.tla;
+  if (!en) return "TBD";
+  return TEAMS_RU[en] || en; // незнакомые (плей-офф placeholder'ы) остаются как есть
 }
 
 // Дата матча в зоне Алматы как "YYYY-MM-DD" — для группировки по дням
