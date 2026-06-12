@@ -115,6 +115,12 @@ function almatyDate(date = new Date()) {
   }).format(date);
 }
 
+// Перевод ключа даты "YYYY-MM-DD" в человекочитаемый "DD-MM-YYYY"
+function humanDate(key) {
+  const [y, m, d] = key.split("-");
+  return `${d}-${m}-${y}`;
+}
+
 // Только время "ЧЧ:ММ" по Алматы
 function almatyTime(isoDate) {
   return new Intl.DateTimeFormat("ru-RU", {
@@ -130,8 +136,9 @@ async function sendDailyDigest(matches, dateStr) {
     .filter((m) => almatyDate(new Date(m.utcDate)) === dateStr)
     .sort((a, b) => new Date(a.utcDate) - new Date(b.utcDate));
 
+  const human = humanDate(dateStr);
   if (todays.length === 0) {
-    await sendSlack(`📅 *Матчи ЧМ-2026 на сегодня (${dateStr})*\nСегодня матчей нет.`);
+    await sendSlack(`📅 *Матчи ЧМ-2026 на сегодня (${human})*\nСегодня матчей нет.`);
     return;
   }
 
@@ -139,7 +146,7 @@ async function sendDailyDigest(matches, dateStr) {
     (m) => `🕐 ${almatyTime(m.utcDate)} — ${teamName(m.homeTeam)} 🆚 ${teamName(m.awayTeam)}`
   );
   await sendSlack(
-    `📅 *Матчи ЧМ-2026 на сегодня (${dateStr}, Алматы)* — всего ${todays.length}\n${lines.join("\n")}`
+    `📅 *Матчи ЧМ-2026 на сегодня (${human}, Алматы)* — всего ${todays.length}\n${lines.join("\n")}`
   );
 }
 
@@ -187,7 +194,7 @@ async function sendStartupNotice(matches) {
   await sendSlack(
     `🔄 *Бот перезапущен — новая версия*\n` +
       `Версия: ${version}\n\n` +
-      `📅 *Матчи на завтра (${tomorrow}, Алматы):*\n${body}`
+      `📅 *Матчи на завтра (${humanDate(tomorrow)}, Алматы):*\n${body}`
   );
 }
 
