@@ -165,6 +165,32 @@ async function fetchMatches() {
   return data.matches || [];
 }
 
+// Стартовое уведомление при каждом запуске/редеплое: версия + матчи на завтра
+async function sendStartupNotice(matches) {
+  const sha = (process.env.RAILWAY_GIT_COMMIT_SHA || "").slice(0, 7);
+  const commitMsg = (process.env.RAILWAY_GIT_COMMIT_MESSAGE || "").split("\n")[0];
+  const version = sha
+    ? `\`${sha}\`${commitMsg ? ` — ${commitMsg}` : ""}`
+    : "локальный запуск";
+
+  const tomorrow = almatyDate(new Date(Date.now() + 24 * 60 * 60 * 1000));
+  const list = matches
+    .filter((m) => almatyDate(new Date(m.utcDate)) === tomorrow)
+    .sort((a, b) => new Date(a.utcDate) - new Date(b.utcDate));
+
+  const body = list.length
+    ? list
+        .map((m) => `🕐 ${almatyTime(m.utcDate)} — ${teamName(m.homeTeam)} 🆚 ${teamName(m.awayTeam)}`)
+        .join("\n")
+    : "Матчей нет.";
+
+  await sendSlack(
+    `🔄 *Бот перезапущен — новая версия*\n` +
+      `Версия: ${version}\n\n` +
+      `📅 *Матчи на завтра (${tomorrow}, Алматы):*\n${body}`
+  );
+}
+
 // ---------- Основной проход ----------
 async function check() {
   const state = await loadState();
@@ -241,5 +267,14 @@ async function loop() {
 }
 
 console.log(`WC2026 → Slack запущен. Опрос каждые ${POLL_MINUTES} мин, предупреждение за ${PRE_START_MINUTES} мин до старта.`);
+
+// При каждом запуске/редеплое: сообщить о новой версии и показать матчи на завтра
+try {
+  const matches = await fetchMatches();
+  await sendStartupNotice(matches);
+} catch (err) {
+  console.error(`[${new Date().toISOString()}] Не удалось отправить стартовое уведомление:`, err.message);
+}
+
 loop();
 setInterval(loop, POLL_MINUTES * 60 * 1000);
